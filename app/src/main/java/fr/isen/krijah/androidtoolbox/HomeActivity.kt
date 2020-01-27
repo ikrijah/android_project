@@ -35,11 +35,16 @@ class HomeActivity : AppCompatActivity() {
             editor.apply()
         }
         
-        homeTitle.setOnClickListener {
+        saveImageView.setOnClickListener {
             Toast.makeText(this, "vous êtes redirigé vers le formulaire", Toast.LENGTH_LONG).show()
             startActivity( Intent (this@HomeActivity, FormulaireActivity::class.java))
         }
 
+
+        authorizationImageView.setOnClickListener(){
+            Toast.makeText(this, "vous êtes redirigé vers les informations Android", Toast.LENGTH_LONG).show()
+            startActivity( Intent ( this@HomeActivity, AccessDataActivity::class.java))
+        }
     }
 
 }
