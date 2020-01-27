@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,10 +8,18 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-    <TextView
-        android:id="@+id/fragmentText2"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="TEST2222" />
+        android:layout_height="520dp" >
+
+        <TextView
+            android:id="@+id/fragmentText2"
+            android:layout_width="match_parent"
+            android:layout_height="251dp"
+            android:background="#B2B11B1B"
+            android:text="Fragment 2"
+            android:textAlignment="center"
+            android:textSize="30sp" />
+    </androidx.cardview.widget.CardView>
 
 </FrameLayout>

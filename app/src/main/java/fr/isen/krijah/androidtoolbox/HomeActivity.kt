@@ -34,6 +34,11 @@ class HomeActivity : AppCompatActivity() {
 
             editor.apply()
         }
+        
+        homeTitle.setOnClickListener {
+            Toast.makeText(this, "vous êtes redirigé vers le formulaire", Toast.LENGTH_LONG).show()
+            startActivity( Intent (this@HomeActivity, FormulaireActivity::class.java))
+        }
 
     }
 

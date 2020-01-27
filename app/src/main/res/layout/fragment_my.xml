@@ -6,12 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".MyFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:id="@+id/fragmentText"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#00D3CC91"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="305dp"
+        app:cardBackgroundColor="#6BC5D5">
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="405dp"
+            android:layout_height="111dp"
+            android:text="Fragment 1"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+    </androidx.cardview.widget.CardView>
 </FrameLayout>

@@ -34,16 +34,6 @@ class MyFragment : Fragment() {
         }
     }
 
-
-    private fun notification(message: String, isActive: Boolean) {
-        if (isActive){
-            fragmentText.text = message
-        }
-        else {
-            Log.d("tag",message)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
