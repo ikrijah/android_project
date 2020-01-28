@@ -3,17 +3,18 @@ package fr.isen.krijah.androidtoolbox
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentProviderClient
-import android.content.Context
-import android.content.Intent
-import android.content.SyncRequest
+import android.app.AlertDialog
+import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
+import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.provider.Settings
 import android.widget.TextView
 import android.widget.Toast
@@ -25,43 +26,44 @@ import kotlinx.android.synthetic.main.activity_access_data.*
 
 class AccessDataActivity : AppCompatActivity() {
 
-    lateinit var mFusedLocationClient: FusedLocationProviderClient
 
-    // initialisation liste
-    val listeDeNoms: ArrayList<String> = ArrayList()
+    val contactList: MutableList<ContactDTO> = ArrayList()
+
+    lateinit var mFusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_access_data)
 
+
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_CONTACTS)==
+                PackageManager.PERMISSION_DENIED
+            ) {
+                //permission denied
+                val permissions = arrayOf(Manifest.permission.READ_CONTACTS);
+                //show popup to request runtime permission
+                requestPermissions(permissions, PERMISSION_CONTACT_CODE);
+            } else {
+                //permission already granted
+                contactFonction()
+            }
+        } else{
+            contactFonction()
+        }
+
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         getLastLocation()
 
-        addNoms()
-
         listView.layoutManager = LinearLayoutManager(this)
 
-        listView.adapter = NomsAdapter(listeDeNoms, this)
+        listView.adapter = NomsAdapter(contactList, this)
 
-        cameraView.setOnClickListener(){
-            //check runtime permission
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                    PackageManager.PERMISSION_DENIED){
-                    //permission denied
-                    val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE);
-                    //show popup to request runtime permission
-                    requestPermissions(permissions, PERMISSION_CODE);
-                }
-                else{
-                    //permission already granted
-                    pickImageFromGallery();
-                }
-            }
-            else {
-                //system OS is < Marshmallow
-                pickImageFromGallery();
-            }
+        cameraView.setOnClickListener {
+            withItems()
         }
     }
 
@@ -78,6 +80,10 @@ class AccessDataActivity : AppCompatActivity() {
         private val IMAGE_PICK_CODE = 1000;
         //Permission code
         private val PERMISSION_CODE = 1001;
+
+        private val PERMISSION_CONTACT_CODE = 1002;
+
+        private const val CAMERA_PICK_REQUEST = 4444
 
         private val PERMISSION_ID = 42;
     }
@@ -103,27 +109,25 @@ class AccessDataActivity : AppCompatActivity() {
                 // Granted. Start getting the location information
             }
         }
+
+        if (requestCode == PERMISSION_CONTACT_CODE) {
+            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                // Granted. Start getting the contacts information
+            }
+        }
     }
 
     //handle result of picked image
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE){
             cameraView.setImageURI(data?.data)
         }
-    }
 
-    // Adds animals to the empty animals ArrayList
-    fun addNoms() {
-        listeDeNoms.add("Nom : Iptissame")
-        listeDeNoms.add("Nom : Iptissouche")
-        listeDeNoms.add("Nom : Girou")
-        listeDeNoms.add("Nom : Girouette")
-        listeDeNoms.add("Nom : Music")
-        listeDeNoms.add("Nom : Waves")
-        listeDeNoms.add("Nom : SuperH")
-        listeDeNoms.add("Nom : SuperH20")
-        listeDeNoms.add("Nom : Chat")
-        listeDeNoms.add("Nom : Chien")
+        else if (resultCode == Activity.RESULT_OK && requestCode == CAMERA_PICK_REQUEST){
+            val imageBitmap = data?.extras?.get("data") as Bitmap
+            cameraView.setImageBitmap(imageBitmap)
+        }
     }
 
 
@@ -196,4 +200,80 @@ class AccessDataActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.lonTextView).text = mLastLocation.longitude.toString()
         }
     }
+
+    fun imageFromGallery(){
+        val intent: Intent = Intent(Intent.ACTION_PICK)
+        intent.setType("image/*")
+        startActivityForResult(intent, IMAGE_PICK_CODE)
+    }
+
+    fun imageFromCamera() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA)==
+                PackageManager.PERMISSION_DENIED
+            ) {
+                //permission denied
+                val permissions = arrayOf(Manifest.permission.CAMERA);
+                //show popup to request runtime permission
+                requestPermissions(permissions, PERMISSION_CODE);
+            } else {
+                //permission already granted
+                Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+                    takePictureIntent.resolveActivity(packageManager)?.also {
+                        startActivityForResult(takePictureIntent, CAMERA_PICK_REQUEST)
+                    }
+
+                }
+            }
+        } else {
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+                takePictureIntent.resolveActivity(packageManager)?.also {
+                    startActivityForResult(takePictureIntent, CAMERA_PICK_REQUEST)
+                }
+            }
+        }
+    }
+
+
+    private val backButtonClick = { _: DialogInterface, _: Int ->
+        Toast.makeText(applicationContext, "Aucune photo choisie", Toast.LENGTH_SHORT).show()
+    }
+
+    fun withItems() {
+
+        val items = arrayOf("Prendre une photo", "Galerie")
+        val builder = AlertDialog.Builder(this)
+        with(builder)
+        {
+            setTitle("Choisir : ")
+            setItems(items) { _, which ->
+                if(items[which] == "Prendre une photo"){
+                    imageFromCamera()
+                }
+                else{
+                    imageFromGallery()
+                }
+            }
+
+            setPositiveButton("Retour", backButtonClick)
+            show()
+        }
+    }
+
+
+    fun contactFonction(){
+
+        val cursorN= contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,null,null,null)
+       cursorN?.let { cursor ->
+           while (cursor.moveToNext()){
+               val name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+               val number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+
+               contactList.add(ContactDTO(name, number))
+           }
+           cursor.close()
+       }
+    }
+
 }
