@@ -41,9 +41,14 @@ class HomeActivity : AppCompatActivity() {
         }
 
 
-        authorizationImageView.setOnClickListener(){
+        authorizationImageView.setOnClickListener{
             Toast.makeText(this, "vous êtes redirigé vers les informations Android", Toast.LENGTH_LONG).show()
             startActivity( Intent ( this@HomeActivity, AccessDataActivity::class.java))
+        }
+
+        webServicesImageView.setOnClickListener {
+            Toast.makeText(this, "vous êtes redirigé vers les web services", Toast.LENGTH_LONG).show()
+            startActivity( Intent (this@HomeActivity, WebServicesActivity::class.java))
         }
     }
 
