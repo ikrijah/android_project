@@ -2,6 +2,7 @@ package fr.isen.krijah.androidtoolbox
 
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -22,17 +23,17 @@ class FormulaireActivity : AppCompatActivity() {
             val month = c.get(Calendar.MONTH)
             val day = c.get(Calendar.DAY_OF_MONTH)
 
-
-            val dpd = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+            val dpd = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, yearToday, monthOfYear, dayOfMonth ->
 
                 // Display Selected date in textbox
-                birthdayText.setText("" + dayOfMonth + "/" + (monthOfYear+1) + "/" + year)
+                birthdayText.setText("" + dayOfMonth + "/" + (monthOfYear+1) + "/" + yearToday)
             }, year, month, day)
 
             dpd.show()
 
             save.setOnClickListener() {
                 saveDataToFile (lastName.text.toString(), firstName.text.toString(), birthdayText.text.toString())
+                startActivity( Intent (this@FormulaireActivity, HomeActivity::class.java))
             }
             show.setOnClickListener() {
                 showDataFromFile()
@@ -51,6 +52,7 @@ class FormulaireActivity : AppCompatActivity() {
     }
 
     private fun showDataFromFile (){
+        saveDataToFile (lastName.text.toString(), firstName.text.toString(), birthdayText.text.toString())
         val dataJson : String = File (cacheDir.absolutePath + JSON_FILE ).readText()
         if (dataJson.isNotEmpty()){
             val jsonObject = JSONObject(dataJson)
